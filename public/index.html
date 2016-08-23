@@ -2,23 +2,67 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello React!</title>
+    <title>GHE Issues</title>
     <script src="build/react.js"></script>
     <script src="build/react-dom.js"></script>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+		<link rel="stylesheet" href="css/font-awesome.min.css">
   </head>
   <body>
-    <div id="example"></div>
+    <div id="container"></div>
     <script type="text/babel">
-      var Issue = React.createComponent({
+      var Issue = React.createClass({
 				render: function() {
 					return (
+					<div>
+					<h4>#{this.props.data.number}</h4>
+					<p>{this.props.data.title}</p>
+					</div>
 					);
 				}
       });
+
+			var IssueColumn = React.createClass({
+				render: function() {
+					var items = this.props.data.items.map(function(item) {
+						return (
+							<Issue data={item} key={item.id} />
+							);
+						});
+
+					return (
+					<div>
+						<h2>{this.props.data.label}</h2>
+						{items}
+					</div>);
+					}
+				});
+
+			var IssueColumns = React.createClass({
+				getInitialState: function() {
+					return { "columns": [] };
+				},
+				componentDidMount: function() {
+					var columns = $.get(this.props.source, function(result){
+						this.setState({
+							"columns": result
+							});
+						}.bind(this));
+				},
+				render: function() {
+					var columns = this.state.columns.map(function(col) {
+						return (<IssueColumn key={col.label} data={col} />);
+						});
+					return (
+					  <div>{columns}</div>
+					);
+					}
+				});
+
       ReactDOM.render(
-        <h1>Hello, world!</h1>,
-        document.getElementById('example')
+				<IssueColumns source="http://localhost:4567/api/norris/issues?milestone=Sprint+CW+33+2016&labels=feature%2Cbug" />,
+        document.getElementById('container')
       );
     </script>
   </body>
